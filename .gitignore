@@ -1,0 +1,5 @@
+# Ignore persistent data and secrets
+storage/
+.env
+*.log
+.DS_Store
