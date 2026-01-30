@@ -34,3 +34,23 @@ services:
        - /var/run/docker.sock:/var/run/docker.sock:ro
      environment:
        - GLANCES_OPT="-w"
+
+  n8n:
+     image: n8nio/n8n:latest
+     container_name: n8n
+     restart: unless-stopped
+     ports:
+       - "5678:5678"
+     environment:
+       - N8N_SECURE_COOKIE=false
+       - N8N_HOST=raspberrypi.local
+       - N8N_PORT=5678
+       - N8N_PROTOCOL=http
+       - NODE_ENV=production
+       - WEBHOOK_URL=http://localhost:5678
+       - GENERIC_TIMEZONE=America/Toronto
+     volumes:
+       - ./storage/n8n:/home/node/.n8n
+     depends_on:
+       - ollama
+    
