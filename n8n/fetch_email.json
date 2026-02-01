@@ -1,0 +1,142 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "options": {
+          "trackLastMessageId": true
+        }
+      },
+      "type": "n8n-nodes-base.emailReadImap",
+      "typeVersion": 2,
+      "position": [0, 0],
+      "id": "imap_trigger",
+      "name": "Read Email (IMAP)",
+      "credentials": {
+        "imap": {
+          "id": "<CREDENTIALS>",
+          "name": "IMAP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://<IP_ADDRESS>:11434/api/generate",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ {\n  \"model\": \"<AI_MODEL>\",\n  \"prompt\": \"Analyze this email for non-promotional content.\\n\\nRULES:\\n1. List signs of importance: high-authority sender, urgency, deadlines, direct action, personally addressed, financial/legal relevance.\\n2. Assign 'priority_score' (1-5).\\n3. Set 'is_important' to true if score > 2.\\n\\nEMAIL:\\n\" + JSON.stringify($json.textPlain) + \"\\n\\nOUTPUT FORMAT (Strict JSON only):\\n{\\n  \\\"reasoning\\\": \\\"Detailed explanation...\\\",\\n  \\\"priority_score\\\": 0,\\n  \\\"is_important\\\": false\\n}\",\n  \"stream\": false,\n  \"format\": \"json\",\n  \"options\": {\n    \"temperature\": 0.1,\n    \"num_predict\": 256\n  }\n} }}"
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [220, 0],
+      "id": "ai_analysis",
+      "name": "AI Analyst (Mac Pro)"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse the JSON string coming back from Ollama\nconst aiResponse = JSON.parse(items[0].json.response);\n\n// Pass the parsed data along\nreturn [{ json: aiResponse }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [440, 0],
+      "id": "parse_response",
+      "name": "Parse AI JSON"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.is_important }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [660, 0],
+      "id": "filter_important",
+      "name": "Is Important?"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://ntfy.sh/<TOPIC>",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "title",
+              "value": "🚨 High Priority Email"
+            },
+            {
+              "name": "priority",
+              "value": "5"
+            },
+            {
+              "name": "tags",
+              "value": "warning,email"
+            },
+            {
+              "name": "message",
+              "value": "={{ $json.reasoning }}\n\nScore: {{ $json.priority_score }}/5"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [880, 0],
+      "id": "notify_phone",
+      "name": "Notify my phone (ntfy)"
+    }
+  ],
+  "connections": {
+    "Read Email (IMAP)": {
+      "main": [
+        [
+          {
+            "node": "AI Analyst (Mac Pro)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Analyst": {
+      "main": [
+        [
+          {
+            "node": "Parse AI JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse AI JSON": {
+      "main": [
+        [
+          {
+            "node": "Is Important?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Important?": {
+      "main": [
+        [
+          {
+            "node": "Notify Phone (ntfy)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}
