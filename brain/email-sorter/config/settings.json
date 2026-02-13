@@ -1,0 +1,23 @@
+{
+    "imap_server": "imap.gmail.com",
+    "email": "<EMAIL_ADDRESS>",
+    "password": "<APP_PASSWORD>",
+    "rules": [
+        { 
+            "folder": "Finances", 
+            "real_path": "Finances" 
+        },
+        { 
+            "folder": "Socials", 
+            "real_path": "Socials" 
+        },
+        { 
+            "folder": "Spam", 
+            "real_path": "[Gmail]/Spam" 
+        },
+        { 
+            "folder": "Important", 
+            "real_path": "[Gmail]/Important" 
+        }
+    ]
+}

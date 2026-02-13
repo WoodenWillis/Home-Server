@@ -1,0 +1,35 @@
+mqtt:
+  enabled: false
+
+
+detectors:
+  ov:
+    type: openvino
+    device: CPU
+    model_path: /openvino-model/ssdlite_mobilenet_v2.xml
+ffmpeg:
+  hwaccel_args: preset-vaapi
+
+cameras:
+  front_door:
+    ffmpeg:
+      inputs:
+        - path: rtsp://admin:Leader234@192.168.1.122:554/stream1
+          roles:
+            - detect
+            - record
+    detect:
+      enabled: true
+      width: 1280
+      height: 720
+      fps: 5
+    record:
+      enabled: true
+      retain:
+        days: 7
+        mode: motion
+    snapshots:
+      enabled: true
+detect:
+  enabled: true
+version: 0.16-0
