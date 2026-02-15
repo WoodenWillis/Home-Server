@@ -1,0 +1,38 @@
+mqtt:
+  enabled: false
+
+ffmpeg:
+  output_args:
+    record: preset-record-generic-audio-aac
+
+go2rtc:
+  streams:
+    camera_one:
+      - ffmpeg:rtsp://<USERNAME>:<PASSWORD>@<IP_ADDRESS>:554/stream1
+cameras:
+  Front_Door:
+    ffmpeg:
+      inputs:
+        - path: rtsp://127.0.0.1:8554/camera_one
+          input_args: preset-rtsp-restream
+          roles:
+            - detect
+            - record
+    detect:
+      enabled: true
+      width: 1920
+      height: 1080
+      fps: 2
+    record:
+      enabled: true
+      retain:
+        days: 1
+        mode: all
+detect:
+  enabled: true
+version: 0.16-0
+camera_groups:
+  Front:
+    order: 1
+    icon: LuBird
+

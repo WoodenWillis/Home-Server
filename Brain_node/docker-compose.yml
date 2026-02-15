@@ -1,0 +1,46 @@
+services:
+  # --- EMAIL SORTER ---
+  email-sorter:
+    build: ./email-sorter
+    container_name: email_sorter
+    environment:
+      - OLLAMA_HOST=http://<IP_ADDRESS>:11434
+    volumes:
+      - ./email-sorter/config/settings.json:/app/settings.json
+    restart: unless-stopped
+  duplicati:
+    image: lscr.io/linuxserver/duplicati:latest
+    container_name: duplicati
+    environment:
+      - PUID=1000
+      - PGID=1000
+    volumes:
+      - ./duplicati/config:/config
+      - ./duplicati/backups:/backups
+      - <PATH_TO>:/source:ro 
+    ports:
+      - "8200:8200"
+    restart: unless-stopped
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - <PATH_TO>:/root/.ollama
+    environment:
+      - OLLAMA_KEEP_ALIVE=24h
+
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui
+    restart: unless-stopped
+    ports:
+      - "3000:8080"
+    environment:
+      - OLLAMA_BASE_URL=http://ollama:11434
+    volumes:
+      - ./webui_data:/app/backend/data
+    depends_on:
+      - ollama
