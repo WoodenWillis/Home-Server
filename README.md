@@ -8,13 +8,13 @@ My modular home lab setup built around two specialized nodes. It handles AI work
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│                   Cisco Catalyst                      │
-│                                                     │
-│   ┌──────────────────┐    ┌─────────────────────┐  │
-│   │   Brain_node     │    │    Muscle_node      │  │
-│   │  Raspberry Pi 5  │    │     Mac Pro         │  │
-│   │  AI · Backup     │    │  Frigate · Compute  │  │
-│   └──────────────────┘    └─────────────────────┘  │
+│                   Cisco Catalyst                              │
+│                                                               │
+│   ┌──────────────────┐    ┌─────────────────────┐     │
+│   │   Brain_node         │   │    Muscle_node           │     │
+│   │  Raspberry Pi 5      │   │     Mac Pro              │     │
+│   │  AI · Backup         │   │  Frigate • Movies        │     │
+│   └──────────────────┘    └─────────────────────┘     │
 └─────────────────────────────────────────────────────┘
 ```
 
