@@ -32,7 +32,6 @@ This repository contains the configurations for my multi-node home lab. The setu
 
 ### Muscle_node — (Mac Pro Trashcan)
 
-- Muscle_node (Mac Pro)
 - Role: Handles resource-intensive tasks.
 - Video: Runs Frigate NVR for camera object detection and Jellyfin for media.
 - Hardware: Both services use GPU passthrough (/dev/dri/renderD128) for hardware-accelerated video processing.
