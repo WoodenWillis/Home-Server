@@ -1,71 +1,68 @@
 # Home-Server
 
-My modular home lab setup built around two specialized nodes. It handles AI workloads, media processing, security research, and network services. Each node has a defined role. I called them the Brain and the Muscle.
+This repository contains the configurations for my multi-node home lab. The setup is divided into two primary nodes to balance compute tasks and is managed through an isolated network controlled by an OpenWrt gateway and my Cisco Catalyst switch.
 
 ---
 
 ## Architecture
-
 ```
-┌─────────────────────────────────────────────────────┐
-│                   Cisco Catalyst                              │
-│                                                               │
-│   ┌──────────────────┐    ┌─────────────────────┐     │
-│   │   Brain_node         │   │    Muscle_node           │     │
-│   │  Raspberry Pi 5      │   │     Mac Pro              │     │
-│   │  AI · Backup         │   │  Frigate • Movies        │     │
-│   └──────────────────┘    └─────────────────────┘     │
-└─────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────┐
+│              Cisco Catalyst 3750 (Isolated)             │
+│   (VLAN 10: ServerZone | VLAN 20: CamNet | No WAN)      │
+│                                                         │
+│   ┌───────────────────┐        ┌─────────────────────┐  │
+│   │   🧠 Brain_node   │        │   💪 Muscle_node    │  │
+│   │  Raspberry Pi 5   │        │      Mac Pro        │  │
+│   │  Inference/Backup │        │   NVR/Transcoding   │  │
+│   └─────────┬─────────┘        └──────────┬──────────┘  │
+└─────────────┼─────────────────────────────┼─────────────┘
+              └───────[ ThinkCentre ]───────┘
+                 (Management & Sync Plane)
 ```
-
 ---
 
 ## Nodes
 
-### 🧠 Brain_node — Raspberry Pi 5 16GB
-Orchestrateur and intelligence node. Handles lightweight AI tasks and  automates backkups.
+### Brain_node (Raspberry Pi 5)
 
-**Primary responsibilities:**
-- Local LLM / AI inference tasks
-- Scheduled backup orchestration
-- Low-power always on compute
+- Role: Handles lightweight, always-on services.
+- AI: Runs Ollama for local LLM inference (qwen2.5-coder:14b).
+- Storage: Boots from an external NVMe SSD. It is mounted via UUID in /etc/fstab to ensure the system only boots when the data drive is present.
+- Backup: Uses Duplicati for scheduled container data backups.
 
-### 💪 Muscle_node — Mac Pro Trashcan
-The heavy compute node. Runs GPU-accelerated workloads that need more resources.
+### Muscle_node — (Mac Pro Trashcan)
 
-**Primary responsibilities:**
-- [Frigate NVR](https://frigate.video/) — real-time object detection from camera feeds
-- High-throughput data processing
-- Movie streaming server. 
+- Muscle_node (Mac Pro)
+- Role: Handles resource-intensive tasks.
+- Video: Runs Frigate NVR for camera object detection and Jellyfin for media.
+- Hardware: Both services use GPU passthrough (/dev/dri/renderD128) for hardware-accelerated video processing.
+- Network: Uses network_mode: "host" to simplify discovery and performance within the isolated segment.
+
+### Network Configuration (OpenWrt & Cisco)
+
+The network is partitioned into zones to keep traffic separated and secure.
+
+- Subnetwork Isolation: The Cisco Catalyst switch is on a separate subnetwork that has no default gateway to the internet. This means the server nodes and cameras are physically     unable to reach the WAN.
+- VLANs:
+        - camnet (VLAN 20): Dedicated to cameras with isolate '1' enabled, preventing the cameras from talking to each other.
+        - serverzone (VLAN 10): Where the Brain and Muscle nodes live.
+- Traffic Management: I use SQM (Cake) on the OpenWrt WAN interface to prevent bufferbloat and keep management connections stable during high traffic.
+- Remote Access: Secured via Tailscale running directly on the OpenWrt router.
 
 ---
 
-## Repository Structure
-
-```
-Home-Server/
-├── Brain_node/       # Configs, scripts, and services for the Raspberry Pi 5
-├── Muscle_node/      # Configs, scripts, and services for the Mac Pro
-└── README.md
-```
-
 ---
 
-## Set-up
-
-- Docker and Docker Compose
-- SSH access
-- Cisco Catalyst 3750 for VLAN isolation
+## Workflow
+Centralized Configs: Every configuration is done on my Thinkcentre where my nodes directories are mounted via sshfs.
+Deployment: Any changes are immediately available on the nodes for a docker compose up -d.
   
-### Deployment
+## Technical Specs
 
-Each node directory is self-contained. Navigate into the relevant node folder and apply configs directly:
-
-```bash
-deploy services on Brain_node and Muscle_node
-cd ~/home-server
-docker compose up -d
-```
+- Router OS: OpenWrt
+- Switch: Cisco Catalyst 3750 
+- Inference: Ollama
+- Containers: Docker / Docker Compose
 
 ## Contributing
 
