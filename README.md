@@ -56,12 +56,6 @@ The network is partitioned into zones to keep traffic separated and secure.
 Centralized Configs: Every configuration is done on my Thinkcentre where my nodes directories are mounted via sshfs.
 Deployment: Any changes are immediately available on the nodes for a docker compose up -d.
   
-## Technical Specs
-
-- Router OS: OpenWrt
-- Switch: Cisco Catalyst 3750 
-- Inference: Ollama
-- Containers: Docker / Docker Compose
 
 ## Contributing
 
