@@ -43,7 +43,7 @@ The network is partitioned into zones to keep traffic separated and secure.
 
 - Subnetwork Isolation: The Cisco Catalyst switch is on a separate subnetwork that has no default gateway to the internet. This means the server nodes and cameras are physically     unable to reach the WAN.
 - VLANs:
-        - camnet (VLAN 20): Dedicated to cameras with isolate '1' enabled, preventing the cameras from talking to each other.
+        - camnet (VLAN 40): Dedicated to cameras with isolate '1' enabled, preventing the cameras from talking to each other.
         - serverzone (VLAN 10): Where the Brain and Muscle nodes live.
 - Traffic Management: I use SQM (Cake) on the OpenWrt WAN interface to prevent bufferbloat and keep management connections stable during high traffic.
 - Remote Access: Secured via Tailscale running directly on the OpenWrt router.
